@@ -28,8 +28,10 @@ private:
     std::vector<glm::vec3> point_set;
 
     sdf::shape sdf_shape;
+
+    void SphereSetIntersections();
 public:
     SphereCarving(const sdf::shape& sdf_shape_);
-
+    
     void Iterate();
 };

@@ -9,6 +9,10 @@ SphereCarving::SphereCarving(const sdf::shape& sdf_shape_) : sdf_shape(sdf_shape
 	}
 }
 
+void SphereCarving::SphereSetIntersections() {
+
+}
+
 void SphereCarving::Iterate() {
 
 	// evaluate on the point_set to augment the sphere_set
