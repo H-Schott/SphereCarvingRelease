@@ -5,10 +5,8 @@
 #include <glm/glm.hpp>
 #include <imgui.h>
 #include "ImFileDialog.h"
-#include "heightfield.h"
 
 
-#define TERRAIN_DIR (std::string(RESOURCE_DIR) + "/data/heightfields").c_str()
 #define SHADER_DIR (std::string(RESOURCE_DIR) + "/data/shaders").c_str()
 
 
@@ -16,13 +14,11 @@ class Window {
 protected:
 	GLFWwindow* windowPtr;
 	static int width, height;
-	HeightField m_hf;
 
 	// OpenGL
 	inline static GLuint m_sdf_shader = 0;
 	inline static GLuint m_mesh_shader = 0;
 	inline static GLuint m_sdf_vao = 0;
-	inline static GLuint m_terrain_buffer = 0;
 
 	// Orbiter
 	struct Orbiter {
@@ -49,7 +45,6 @@ public:
 	bool Exit() const;
 	void Update();
 
-	void LoadTerrain();
 	static void ReloadShaders();
 
 	bool GetKey(int key) const;

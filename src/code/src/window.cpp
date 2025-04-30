@@ -132,16 +132,6 @@ Window::Window(const char* windowName, int w, int h) {
 	std::cout << "OpenGL device information: Renderer: " << (const char*)glGetString(GL_RENDERER) << std::endl;
 	std::cout << "Dear ImGui: " << ImGui::GetVersion() << std::endl;
 
-	/*
-	// selectionne tous les messages
-	glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
-	// desactive les messages du compilateur de shaders
-	glDebugMessageControlARB(GL_DEBUG_SOURCE_SHADER_COMPILER, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_FALSE);
-	
-	glDebugMessageCallbackARB(MessageCallback, NULL);
-	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-	*/
-
 	// glfw callbacks
 	glfwSetScrollCallback(windowPtr, [](GLFWwindow* win, double xoffset, double yoffset) {
 			Window::orbiter.radius -= 0.9f * float(yoffset);
@@ -164,7 +154,6 @@ Window::Window(const char* windowName, int w, int h) {
 Window::~Window()
 {
 	glDeleteVertexArrays(1, &m_sdf_vao);
-	glDeleteBuffers(1, &m_terrain_buffer);
 	glDeleteProgram(m_sdf_shader);
 
 	ImGui_ImplOpenGL3_Shutdown();
@@ -178,18 +167,9 @@ void Window::InitGL() {
 	ReloadShaders();
 
 	glGenVertexArrays(1, &m_sdf_vao);
-	glGenBuffers(1, &m_terrain_buffer);
 
-	std::string hf_filename = std::string(RESOURCE_DIR) + "/data/heightfields/mountains.png";
-	m_hf = HeightField(Box2D(glm::vec2(0), 10 * 1000), hf_filename.c_str(), 0., 3000.);
-
-	LoadTerrain();
 }
 
-void Window::LoadTerrain() {
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_terrain_buffer);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(float) * m_hf.GetSizeX() * m_hf.GetSizeY(), m_hf.GetFloats().data(), GL_STATIC_READ);
-}
 
 void Window::ReloadShaders() {
 	std::string v_filename = std::string(RESOURCE_DIR) + "/data/shaders/sdf.vert.glsl";
@@ -207,8 +187,8 @@ void Window::ProcessInputs() {
 		if (mouse_pressed) {
 			glm::ivec2 delta_pos = current_pos - mouse_last_pos;
 			Window::orbiter.phi -= 0.01f * float(delta_pos[0]);
-			Window::orbiter.phi += 2.f * M_PI;
-			Window::orbiter.phi -= int(Window::orbiter.phi / (2.f * M_PI)) * 2.f * M_PI;
+			Window::orbiter.phi += 2.f * float(M_PI);
+			Window::orbiter.phi -= int(Window::orbiter.phi / (2.f * float(M_PI))) * 2.f * float(M_PI);
 			Window::orbiter.psi += 0.01f * float(delta_pos[1]);
 			Window::orbiter.psi = std::clamp(Window::orbiter.psi, -0.48f * float(M_PI), 0.48f * float(M_PI));
 		}
@@ -242,9 +222,7 @@ void Window::Render() {
 	glUniform3f(glGetUniformLocation(m_sdf_shader, "eye"), eye[0], eye[1], eye[2]);
 	glUniform1f(glGetUniformLocation(m_sdf_shader, "focal"), Window::orbiter.focal);
 	glUniform3f(glGetUniformLocation(m_sdf_shader, "up"), Window::orbiter.up[0], Window::orbiter.up[1], Window::orbiter.up[2]);
-	glUniform2i(glGetUniformLocation(m_sdf_shader, "terrain_size"), m_hf.GetSizeX(), m_hf.GetSizeY());
 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_terrain_buffer);
 	glBindVertexArray(m_sdf_vao);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

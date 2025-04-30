@@ -2,7 +2,7 @@
 
 
 int main() {
-	Window* window = new Window("Terrain Viewer", 1000, 500);
+	Window* window = new Window("Sphere Carving", 1000, 500);
 	
 	window->ResetCamera();
 

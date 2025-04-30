@@ -2,6 +2,12 @@
 #include "lodepng.h"
 #include <iostream>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+
 void write_16_png(const char* filename, const std::vector<unsigned char>& img, unsigned int width, unsigned int height) {
 
     if (img.size() != width * height * 2) {
