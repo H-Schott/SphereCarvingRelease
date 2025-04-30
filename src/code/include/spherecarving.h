@@ -29,6 +29,7 @@ private:
 
     sdf::shape sdf_shape;
 
+    bool ValidIntersectionCheck(const glm::vec3& p, const glm::ivec3& spheres_id) const;
     void SphereSetIntersections();
 public:
     SphereCarving(const sdf::shape& sdf_shape_);

@@ -174,7 +174,8 @@ void Window::InitGL() {
 void Window::ReloadShaders() {
 	std::string v_filename = std::string(RESOURCE_DIR) + "/data/shaders/sdf.vert.glsl";
 	std::string f_filename = std::string(RESOURCE_DIR) + "/data/shaders/sdf.frag.glsl";
-	m_sdf_shader = gl_tools::compile_shaders(v_filename, f_filename);
+
+	m_sdf_shader = gl_tools::compile_shaders(v_filename, f_filename, sdf::glsl_txt(m_sdf_shape));
 }
 
 void Window::ProcessInputs() {

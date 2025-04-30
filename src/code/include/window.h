@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <imgui.h>
 #include "ImFileDialog.h"
+#include "sdf.h"
 
 
 #define SHADER_DIR (std::string(RESOURCE_DIR) + "/data/shaders").c_str()
@@ -14,6 +15,10 @@ class Window {
 protected:
 	GLFWwindow* windowPtr;
 	static int width, height;
+
+	// Model
+	inline static sdf::shape m_sdf_shape = sdf::shape::SPHERE;
+	inline static int m_shape_id = 0;
 
 	// OpenGL
 	inline static GLuint m_sdf_shader = 0;

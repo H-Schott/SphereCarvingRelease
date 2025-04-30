@@ -11,9 +11,17 @@ uniform vec3 up = vec3(0, 0, 1);
 out vec4 FragColor;
 
 
-float sdf(vec3 p) {
-    return length(p) - 1.;
+float d_sphere(vec3 p, float r) {
+    return length(p) - r;
 }
+
+float d_box(vec3 p, vec3 size) {
+    vec3 q = abs(p) - size;
+	return length(max(q, 0.)) + min(max(q.x, max(q.y, q.z)), 0.);
+}
+
+
+#place_sdf_code_here
 
 vec3 sdfNormal(vec3 p) {
     vec2 eps = vec2(0.0001, 0);

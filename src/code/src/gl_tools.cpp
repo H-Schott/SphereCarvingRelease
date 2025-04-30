@@ -3,7 +3,7 @@
 #include <fstream>
 #include <sstream>
 
-GLuint gl_tools::compile_shaders(const std::string& vertexPath, const std::string& fragmentPath) {
+GLuint gl_tools::compile_shaders(const std::string& vertexPath, const std::string& fragmentPath, const std::string& sdf_code) {
 
     // VERTEX
     std::string vertexSource;
@@ -53,6 +53,13 @@ GLuint gl_tools::compile_shaders(const std::string& vertexPath, const std::strin
     catch (std::ifstream::failure e) {
         std::cerr << "ERROR::FRAGMENT_SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
     }
+
+    // place sdf glsl code inside shader
+    fragmentSource.replace(
+        fragmentSource.find("#place_sdf_code_here"),
+        sizeof("#place_sdf_code_here") - 1,
+        sdf_code
+    );
 
     const char* fragmentShaderSource = fragmentSource.c_str();
 

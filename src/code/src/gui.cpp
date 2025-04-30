@@ -22,6 +22,17 @@ void Window::GUI() {
 			ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.8f, 1.0f), "Statistics");
 			ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / float(ImGui::GetIO().Framerate), float(ImGui::GetIO().Framerate));
 		}
+
+		{
+			if (ImGui::RadioButton("Sphere", &m_shape_id, 0)) {
+				m_sdf_shape = sdf::shape::SPHERE;
+				ReloadShaders();
+			}
+			if (ImGui::RadioButton("Box", &m_shape_id, 1)) {
+				m_sdf_shape = sdf::shape::BOX;
+				ReloadShaders();
+			}
+		}
 	}
 	ImGui::End();
 
