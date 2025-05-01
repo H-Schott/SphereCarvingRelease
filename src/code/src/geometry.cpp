@@ -2,7 +2,7 @@
 
 
 bool geo::sphere_inclusion_check(const glm::vec4& s, const glm::vec3& p) {
-	return glm::length(p - glm::vec3(s)) > s.w;
+	return glm::length(p - glm::vec3(s)) <= s.w;
 }
 
 bool geo::sphere_intersection_check(const glm::vec4& sA, const glm::vec4& sB) {
@@ -26,7 +26,7 @@ bool geo::sphere_intersection(const glm::vec4& sA, const glm::vec4& sB, const gl
 	float b = glm::dot(C - A, ex);
 	float c = glm::dot(C - A, ey);
 
-	float x = sA.w * sA.w - sB.w * sB.w + a * a;
+	float x = (sA.w * sA.w - sB.w * sB.w + a * a) / (2.f * a);
 	float y = (sB.w * sB.w - sC.w * sC.w - (x - a) * (x - a) + (x - b) * (x - b) + c * c) / (2.f * c);
 	float z2 = sA.w * sA.w - x * x - y * y;
 

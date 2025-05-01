@@ -54,7 +54,7 @@ void Window::GUI() {
 			ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.8f, 1.0f), "Sphere Carving");
 			ImGui::Text("%d spheres & %i points", m_sc.GetSpheresetSize(), m_sc.GetPointsetSize());
 			if (ImGui::Button("Reset")) {
-				m_sc.Iterate();
+				m_sc = SphereCarving(m_sdf_shape);
 				LoadCarvedBuffer();
 			}
 			ImGui::SameLine();

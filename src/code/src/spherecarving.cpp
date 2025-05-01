@@ -41,7 +41,6 @@ void SphereCarving::SphereSetIntersections() {
 				bool check_jk = geo::sphere_intersection_check(sB, sC);
 				if (!check_jk) continue;
 
-				std::cout << i << " " << j << " " << k << std::endl;
 				
 				glm::vec3 p1, p2;
 				bool inter = geo::sphere_intersection(sA, sB, sC, p1, p2);
