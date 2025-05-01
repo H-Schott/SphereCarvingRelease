@@ -20,6 +20,11 @@ float d_box(vec3 p, vec3 size) {
 	return length(max(q, 0.)) + min(max(q.x, max(q.y, q.z)), 0.);
 }
 
+float d_cylinder(vec3 p, float h, float r) {
+  vec2 d = abs(vec2(length(p.xz), p.y)) - vec2(r, h);
+  return min(max(d.x, d.y), 0.) + length(max(d, 0.));
+}
+
 
 #place_sdf_code_here
 

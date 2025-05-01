@@ -24,13 +24,11 @@ void Window::GUI() {
 		}
 
 		{
-			if (ImGui::RadioButton("Sphere", &m_shape_id, 0)) {
-				m_sdf_shape = sdf::shape::SPHERE;
-				ReloadShaders();
-			}
-			if (ImGui::RadioButton("Box", &m_shape_id, 1)) {
-				m_sdf_shape = sdf::shape::BOX;
-				ReloadShaders();
+			for (int shape_id = 0; shape_id < sdf::shape_list.size(); shape_id++) {
+				if (ImGui::RadioButton(sdf::shape_name_list[shape_id].c_str(), &m_shape_id, shape_id)) {
+					m_sdf_shape = sdf::shape_list[shape_id];
+					ReloadShaders();
+				}
 			}
 		}
 	}
