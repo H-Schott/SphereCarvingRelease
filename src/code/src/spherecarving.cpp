@@ -1,4 +1,5 @@
 #include "spherecarving.h"
+#include <iostream>
 
 SphereCarving::SphereCarving(const sdf::shape& sdf_shape_) : sdf_shape(sdf_shape_) {
 
@@ -39,11 +40,14 @@ void SphereCarving::SphereSetIntersections() {
 				if (!check_ik) continue;
 				bool check_jk = geo::sphere_intersection_check(sB, sC);
 				if (!check_jk) continue;
+
+				std::cout << i << " " << j << " " << k << std::endl;
 				
 				glm::vec3 p1, p2;
 				bool inter = geo::sphere_intersection(sA, sB, sC, p1, p2);
 
 				if (!inter) continue;
+
 
 				// check if intersections are valid
 				if (ValidIntersectionCheck(p1, glm::ivec3(i, j, k))) point_set.push_back(p1);

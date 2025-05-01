@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include <imgui.h>
 #include "ImFileDialog.h"
-#include "sdf.h"
+#include "spherecarving.h"
 
 
 #define SHADER_DIR (std::string(RESOURCE_DIR) + "/data/shaders").c_str()
@@ -13,17 +13,22 @@
 
 class Window {
 protected:
-	GLFWwindow* windowPtr;
+	static GLFWwindow* windowPtr;
 	static int width, height;
 
 	// Model
 	inline static sdf::shape m_sdf_shape = sdf::shape::SPHERE;
-	inline static int m_shape_id = 0;
 
 	// OpenGL
 	inline static GLuint m_sdf_shader = 0;
+	inline static GLuint m_carved_shader = 0;
 	inline static GLuint m_mesh_shader = 0;
 	inline static GLuint m_sdf_vao = 0;
+	inline static GLuint m_carved_buffer = 0;
+	enum class render_mode {SDF, CARVED};
+	inline static render_mode m_render_mode = render_mode::SDF;
+	static constexpr std::array<render_mode, 2> m_render_mode_list = { render_mode::SDF, render_mode::CARVED };
+	inline static const std::array<std::string, 2> m_render_mode_name_list = { "Sdf", "Carved" };
 
 	// Orbiter
 	struct Orbiter {
@@ -37,32 +42,39 @@ protected:
 	inline static Orbiter orbiter = Window::Orbiter();
 
 	// Mouse
-	glm::ivec2 mouse_last_pos = glm::ivec2(-1);
-	bool mouse_pressed = false;
+	inline static glm::ivec2 mouse_last_pos = glm::ivec2(-1);
+	inline static bool mouse_pressed = false;
 
-	void InitGL();
-	void ProcessInputs();
+	// Sphere Carving
+	inline static SphereCarving m_sc = SphereCarving(m_sdf_shape);
+
+	static void InitGL();
+	static void ProcessInputs();
+	static void LoadCarvedBuffer();
+	static void RenderSDF();
+	static void RenderCarved();
+	static void Render();
 
 public:
 	Window(const char* windowName, int w, int h);
 	~Window();
 
-	bool Exit() const;
-	void Update();
+	static bool Exit();
+	static void Update();
 
 	static void ReloadShaders();
+	static void ResetSphereCarving();
 
-	bool GetKey(int key) const;
-	bool GetMousePressed(int mouse) const;
-	glm::vec2 GetMousePosition() const;
-	bool MouseOverGUI() const;
+	static bool GetKey(int key);
+	static bool GetMousePressed(int mouse);
+	static glm::vec2 GetMousePosition();
+	static bool MouseOverGUI();
 
-	int GetWidth() const;
-	int GetHeight() const;
-	GLFWwindow* getPointer();
+	static int GetWidth();
+	static int GetHeight();
+	static GLFWwindow* getPointer();
 
-	void ResetCamera();
+	static void ResetCamera();
 
-	void Render();
-	void GUI();
+	static void GUI();
 };

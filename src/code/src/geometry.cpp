@@ -7,7 +7,7 @@ bool geo::sphere_inclusion_check(const glm::vec4& s, const glm::vec3& p) {
 
 bool geo::sphere_intersection_check(const glm::vec4& sA, const glm::vec4& sB) {
 	float d = glm::length(glm::vec3(sA) - glm::vec3(sB));
-	return (d < sA.w + sB.w) && (d > std::abs(sA.w + sB.w));
+	return (d < sA.w + sB.w) && (d > std::abs(sA.w - sB.w));
 }
 
 bool geo::sphere_intersection(const glm::vec4& sA, const glm::vec4& sB, const glm::vec4& sC, glm::vec3& p1, glm::vec3& p2) {

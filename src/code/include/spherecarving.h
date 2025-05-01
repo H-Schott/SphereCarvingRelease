@@ -22,7 +22,7 @@ private:
         glm::vec3(-1, gr, 0),
         glm::vec3(-1, -gr, 0)
     };
-    glm::vec4 initial_sphere;
+    glm::vec4 initial_sphere = glm::vec4(0, 0, 0, 50);
 
     std::vector<glm::vec4> sphere_set;
     std::vector<glm::vec3> point_set;
@@ -35,4 +35,8 @@ public:
     SphereCarving(const sdf::shape& sdf_shape_);
     
     void Iterate();
+    void* GetSphereData() const { return (void*)sphere_set.data(); };
+    glm::vec4 GetInitialSphere() const { return initial_sphere; };
+    int GetSpheresetSize() const { return sphere_set.size(); };
+    int GetPointsetSize() const { return point_set.size(); };
 };

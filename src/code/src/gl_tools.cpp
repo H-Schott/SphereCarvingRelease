@@ -36,7 +36,7 @@ GLuint gl_tools::compile_shaders(const std::string& vertexPath, const std::strin
         std::cout << "ERROR::VERTEX_SHADER::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
     else {
-        std::cout << "Compiled : " << vertexPath << std::endl;
+        //std::cout << "Compiled : " << vertexPath << std::endl;
     }
 
     // FRAGMENT
@@ -55,11 +55,14 @@ GLuint gl_tools::compile_shaders(const std::string& vertexPath, const std::strin
     }
 
     // place sdf glsl code inside shader
-    fragmentSource.replace(
-        fragmentSource.find("#place_sdf_code_here"),
-        sizeof("#place_sdf_code_here") - 1,
-        sdf_code
-    );
+    size_t sdf_code_pos = fragmentSource.find("#place_sdf_code_here");
+    if (sdf_code_pos != fragmentSource.npos) {
+        fragmentSource.replace(
+            sdf_code_pos,
+            sizeof("#place_sdf_code_here") - 1,
+            sdf_code
+        );
+    }
 
     const char* fragmentShaderSource = fragmentSource.c_str();
 
@@ -74,7 +77,7 @@ GLuint gl_tools::compile_shaders(const std::string& vertexPath, const std::strin
         std::cout << "ERROR::FRAGMENT_SHADER::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
     else {
-        std::cout << "Compiled : " << fragmentPath << std::endl;
+        //std::cout << "Compiled : " << fragmentPath << std::endl;
     }
 
 

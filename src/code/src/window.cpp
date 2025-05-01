@@ -23,19 +23,23 @@ void GLAPIENTRY MessageCallback([[maybe_unused]] GLenum source,
 		// le message a deja ete affiche, pas la peine de recommencer 60 fois par seconde.
 		return;
 
-	if (severity == GL_DEBUG_SEVERITY_HIGH)
+	if (severity == GL_DEBUG_SEVERITY_HIGH) {
 		printf("[openGL error]\n%s\n", message);
-	else if (severity == GL_DEBUG_SEVERITY_MEDIUM)
+	}
+	else if (severity == GL_DEBUG_SEVERITY_MEDIUM) {
 		printf("[openGL warning]\n%s\n", message);
-	else
-		printf("[openGL message]\n%s\n", message);
+	}
+	else {
+		//printf("[openGL message]\n%s\n", message);
+	}
 }
 
+GLFWwindow* Window::windowPtr = nullptr;
 int Window::width = 0;
 int Window::height = 0;
 
 Window::Window(const char* windowName, int w, int h) {
-	windowPtr = nullptr;
+	Window::windowPtr = nullptr;
 
 	// Window
 	Window::width = w;
@@ -67,20 +71,20 @@ Window::Window(const char* windowName, int w, int h) {
 	glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	*/
-	windowPtr = glfwCreateWindow(Window::width, Window::height, windowName, NULL, NULL);
-	if (windowPtr == NULL)
+	Window::windowPtr = glfwCreateWindow(Window::width, Window::height, windowName, NULL, NULL);
+	if (Window::windowPtr == NULL)
 	{
 		std::cout << "GLFW failed to create window" << std::endl;
 		glfwTerminate();
 		return;
 	}
-	glfwMakeContextCurrent(windowPtr);
-	glfwSetWindowSizeCallback(windowPtr, [](GLFWwindow* win, int w, int h) { 
+	glfwMakeContextCurrent(Window::windowPtr);
+	glfwSetWindowSizeCallback(Window::windowPtr, [](GLFWwindow* win, int w, int h) {
 		Window::width = w;
 		Window::height = h;
 		glViewport(0, 0, w, h);
 	});
-	glfwSetInputMode(windowPtr, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	glfwSetInputMode(Window::windowPtr, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
 	// OpenGL
 	glewInit();
@@ -92,12 +96,14 @@ Window::Window(const char* windowName, int w, int h) {
 		glfwTerminate();
 		return;
 	}
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(MessageCallback, 0);
 
 	// Dear ImGui
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
-	ImGui_ImplGlfw_InitForOpenGL(windowPtr, true);
+	ImGui_ImplGlfw_InitForOpenGL(Window::windowPtr, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
 	// ImFileDialog requires you to set the CreateTexture and DeleteTexture
@@ -122,7 +128,7 @@ Window::Window(const char* windowName, int w, int h) {
 	};
 
 
-	glfwGetFramebufferSize(windowPtr, &Window::width, &Window::height);
+	glfwGetFramebufferSize(Window::windowPtr, &Window::width, &Window::height);
 	glViewport(0, 0, Window::width, Window::height);
 
 	// vsync
@@ -133,13 +139,13 @@ Window::Window(const char* windowName, int w, int h) {
 	std::cout << "Dear ImGui: " << ImGui::GetVersion() << std::endl;
 
 	// glfw callbacks
-	glfwSetScrollCallback(windowPtr, [](GLFWwindow* win, double xoffset, double yoffset) {
+	glfwSetScrollCallback(Window::windowPtr, [](GLFWwindow* win, double xoffset, double yoffset) {
 			Window::orbiter.radius -= 0.9f * float(yoffset);
 			Window::orbiter.radius = std::clamp(Window::orbiter.radius, 0.1f, 30.f);
 		}
 	);
 
-	glfwSetKeyCallback(windowPtr, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+	glfwSetKeyCallback(Window::windowPtr, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
 			if (key == GLFW_KEY_R && action == GLFW_PRESS) {
 				Window::ReloadShaders();
 			}
@@ -147,14 +153,15 @@ Window::Window(const char* windowName, int w, int h) {
 	);
 
 	// setup opengl
-	std::cout << "start init GL" << std::endl;
 	InitGL();
 }
 
 Window::~Window()
 {
 	glDeleteVertexArrays(1, &m_sdf_vao);
+	glDeleteBuffers(1, &m_carved_buffer);
 	glDeleteProgram(m_sdf_shader);
+	glDeleteProgram(m_carved_shader);
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
@@ -167,6 +174,9 @@ void Window::InitGL() {
 	ReloadShaders();
 
 	glGenVertexArrays(1, &m_sdf_vao);
+	glCreateBuffers(1, &m_carved_buffer);
+
+	LoadCarvedBuffer();
 
 }
 
@@ -174,12 +184,20 @@ void Window::InitGL() {
 void Window::ReloadShaders() {
 	std::string v_filename = std::string(RESOURCE_DIR) + "/data/shaders/sdf.vert.glsl";
 	std::string f_filename = std::string(RESOURCE_DIR) + "/data/shaders/sdf.frag.glsl";
-
 	m_sdf_shader = gl_tools::compile_shaders(v_filename, f_filename, sdf::glsl_txt(m_sdf_shape));
+
+	std::string f_filename_carved = std::string(RESOURCE_DIR) + "/data/shaders/carved.frag.glsl";
+	m_carved_shader = gl_tools::compile_shaders(v_filename, f_filename_carved, "");
+}
+
+void Window::ResetSphereCarving() {
+	m_sc = SphereCarving(m_sdf_shape);
+	LoadCarvedBuffer();
 }
 
 void Window::ProcessInputs() {
 	// MOUSE MOVEMENT TO ORBITER MOVEMENT
+	if (MouseOverGUI()) return;
 	if (glfwGetMouseButton(windowPtr, GLFW_MOUSE_BUTTON_1)) {
 		double x, y;
 		glfwGetCursorPos(windowPtr, &x, &y);
@@ -202,7 +220,7 @@ void Window::ProcessInputs() {
 	}
 }
 
-bool Window::MouseOverGUI() const {
+bool Window::MouseOverGUI() {
 	if (!ImGui::GetCurrentContext())
 		return false;
 	return ImGui::IsWindowFocused(ImGuiFocusedFlags_AnyWindow)
@@ -210,7 +228,12 @@ bool Window::MouseOverGUI() const {
 		|| ImGui::IsAnyItemHovered();
 }
 
-void Window::Render() {
+void Window::LoadCarvedBuffer() {
+	glNamedBufferData(m_carved_buffer, m_sc.GetSpheresetSize() * sizeof(glm::vec4), m_sc.GetSphereData(), GL_STATIC_READ);
+	std::cout << "Loaded " << m_sc.GetSpheresetSize() << " spheres." << std::endl;
+}
+
+void Window::RenderSDF() {
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -229,6 +252,45 @@ void Window::Render() {
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
 	glUseProgram(0);
+}
+
+void Window::RenderCarved() {
+	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(m_carved_shader);
+
+	glUniform2i(glGetUniformLocation(m_carved_shader, "uResolution"), Window::width, Window::height);
+	glUniform3f(glGetUniformLocation(m_carved_shader, "center"), Window::orbiter.center[0], Window::orbiter.center[1], Window::orbiter.center[2]);
+	glm::vec3 eye = std::cos(Window::orbiter.psi) * glm::vec3(std::cos(Window::orbiter.phi), std::sin(Window::orbiter.phi), 0.f) + glm::vec3(0.f, 0.f, std::sin(Window::orbiter.psi));
+	eye = Window::orbiter.radius * normalize(eye);
+	glUniform3f(glGetUniformLocation(m_carved_shader, "eye"), eye[0], eye[1], eye[2]);
+	glUniform1f(glGetUniformLocation(m_carved_shader, "focal"), Window::orbiter.focal);
+	glUniform3f(glGetUniformLocation(m_carved_shader, "up"), Window::orbiter.up[0], Window::orbiter.up[1], Window::orbiter.up[2]);
+
+	glUniform1i(glGetUniformLocation(m_carved_shader, "nb_spheres"), m_sc.GetSpheresetSize());
+	glm::vec4 big_sphere = m_sc.GetInitialSphere();
+	glUniform4f(glGetUniformLocation(m_carved_shader, "big_sphere"), big_sphere.x, big_sphere.y, big_sphere.z, big_sphere.w);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_carved_buffer);
+
+	glBindVertexArray(m_sdf_vao);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+	glUseProgram(0);
+}
+
+void Window::Render() {
+	switch (m_render_mode) {
+	case render_mode::SDF:
+		RenderSDF();
+		break;
+	case render_mode::CARVED:
+		RenderCarved();
+		break;
+	default:
+		break;
+	}
 }
 
 void Window::Update() {
@@ -254,29 +316,29 @@ void Window::Update() {
 	glfwPollEvents();
 }
 
-bool Window::GetKey(int key) const {
+bool Window::GetKey(int key) {
 	return bool(glfwGetKey(windowPtr, key));
 }
 
-bool Window::GetMousePressed(int mouse) const {
+bool Window::GetMousePressed(int mouse) {
 	return bool(glfwGetMouseButton(windowPtr, mouse));
 }
 
-glm::vec2 Window::GetMousePosition() const {
+glm::vec2 Window::GetMousePosition() {
 	double x, y;
 	glfwGetCursorPos(windowPtr, &x, &y);
 	return glm::vec2(x, y);
 }
 
-bool Window::Exit() const {
+bool Window::Exit() {
 	return glfwWindowShouldClose(windowPtr) || glfwGetKey(windowPtr, GLFW_KEY_ESCAPE);
 }
 
-int Window::GetWidth() const {
+int Window::GetWidth() {
 	return width;
 }
 
-int Window::GetHeight() const {
+int Window::GetHeight() {
 	return height;
 }
 
