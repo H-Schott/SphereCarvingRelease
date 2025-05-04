@@ -14,40 +14,7 @@ out vec4 FragColor;
 layout(binding = 0, std430) readonly  buffer InSPheres  { vec4  spheres[]; };
 uniform vec4 big_sphere;
 uniform int nb_spheres;
-/*
-const int nb_spheres = 30;
-const vec4 big_sphere = vec4(0, 0, 0, 2);
-const vec4[30] spheres = vec4[30](vec4(0, 0, 2, 1.2),
-								vec4(0, 0, -2, 1.2),
-								vec4(0, 2, 0, 1.2),
-								vec4(0, -2, 0, 1.2),
-								vec4(2, 0, 0, 1.2),
-								vec4(-2, 0, 0, 1.2),
-								vec4(1, 2, 0, 1.5),
-								vec4(2, 1, 0, 1.5),
-								vec4(0, 2, 1, 1.5),
-								vec4(0, 1, 2, 1.5),
-								vec4(2, 0, 1, 1.5),
-								vec4(1, 0, 2, 1.5),
-								vec4(-1, 2, 0, 1.5),
-								vec4(-2, 1, 0, 1.5),
-								vec4(0, -2, 1, 1.5),
-								vec4(0, -1, 2, 1.5),
-								vec4(-2, 0, 1, 1.5),
-								vec4(-1, 0, 2, 1.5),
-								vec4(-1, -2, 0, 1.5),
-								vec4(-2, -1, 0, 1.5),
-								vec4(0, -2, -1, 1.5),
-								vec4(0, -1, -2, 1.5),
-								vec4(-2, 0, -1, 1.5),
-								vec4(-1, 0, -2, 1.5),
-								vec4(1, -2, 0, 1.5),
-								vec4(2, -1, 0, 1.5),
-								vec4(0, 2, -1, 1.5),
-								vec4(0, 1, -2, 1.5),
-								vec4(2, 0, -1, 1.5),
-								vec4(1, 0, -2, 1.5));
-*/
+
 
 bool inSphere(vec3 p, vec4 s) {
 	return length(p - vec3(s)) < s.w;

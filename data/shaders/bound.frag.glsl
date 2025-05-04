@@ -14,16 +14,6 @@ out vec4 FragColor;
 layout(binding = 0, std430) readonly  buffer InHalfPlanes  { vec4  hplanes[]; };
 
 uniform int nb_hplanes = 0;
-/*
-vec4[7] hplanes = vec4[7](vec4(1,  0,  0, 1),
-                        vec4(-1, 0,  0, 1),
-                        vec4(0,  1,  0, 1),
-                        vec4(0, -1,  0, 1),
-                        vec4(0,  0,  1, 1),
-                        vec4(0,  0, -1, 1),
-                        vec4(normalize(vec3(1, 1, 1)), 1)
-                        );
-*/
 
 bool in_hplane(vec3 p, vec4 hp) {
     return dot(p, vec3(hp)) < hp.w + 0.0001;
