@@ -31,7 +31,7 @@ float sdf::evaluation(const sdf::shape& s, const glm::vec3& p) {
 		d = d_box(p, glm::vec3(0.3, 0.6, 1.));
 		d = glm::max(d, -d_box(p - glm::vec3(0.2, -0.4, 0.), glm::vec3(0.3, 0.6, 0.1)));
 		glm::vec3 q = glm::vec3(p.z, p.x, p.y);
-		d = glm::max(d, -d_cylinder(q, 0.4, 0.3));
+		d = glm::max(d, -d_cylinder(q, 0.4, 0.5));
 		d = glm::max(d, -d_cylinder(q + glm::vec3(0.85, 0., 0.45), 4., 0.1));
 		d = glm::max(d, -d_cylinder(q + glm::vec3(-0.85, 0., 0.45), 0.4, 0.1));
 		d = glm::max(d, -d_cylinder(q + glm::vec3(0.85, 0., -0.45), 0.4, 0.1));
@@ -76,7 +76,7 @@ std::string sdf::glsl_txt(const sdf::shape& s) {
 				float d = d_box(p, vec3(0.3, 0.6, 1.));
 				d = max(d, - d_box(p - vec3(0.2, -0.4, 0.), vec3(0.3, 0.6, 0.1)));
 				p = p.zxy;
-				d = max(d, - d_cylinder(p, 0.4, 0.3));
+				d = max(d, - d_cylinder(p, 0.4, 0.5));
 				d = max(d, - d_cylinder(p + vec3(0.85, 0., 0.45), 4., 0.1));
 				d = max(d, - d_cylinder(p + vec3(-0.85, 0., 0.45), 0.4, 0.1));
 				d = max(d, - d_cylinder(p + vec3(0.85, 0., -0.45), 0.4, 0.1));

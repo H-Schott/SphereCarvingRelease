@@ -2,6 +2,7 @@ add_executable(main)
 target_sources(main
     PRIVATE
     include/box.h
+    include/convhull_3d.h
     include/geometry.h
     include/gl_tools.h
     include/ImFileDialog.h

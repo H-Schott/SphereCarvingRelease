@@ -160,8 +160,11 @@ Window::~Window()
 {
 	glDeleteVertexArrays(1, &m_sdf_vao);
 	glDeleteBuffers(1, &m_carved_buffer);
+	glDeleteBuffers(1, &m_bound_buffer);
+
 	glDeleteProgram(m_sdf_shader);
 	glDeleteProgram(m_carved_shader);
+	glDeleteProgram(m_bound_shader);
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
@@ -175,8 +178,9 @@ void Window::InitGL() {
 
 	glGenVertexArrays(1, &m_sdf_vao);
 	glCreateBuffers(1, &m_carved_buffer);
+	glCreateBuffers(1, &m_bound_buffer);
 
-	LoadCarvedBuffer();
+	ResetSphereCarving();
 
 }
 
@@ -188,11 +192,16 @@ void Window::ReloadShaders() {
 
 	std::string f_filename_carved = std::string(RESOURCE_DIR) + "/data/shaders/carved.frag.glsl";
 	m_carved_shader = gl_tools::compile_shaders(v_filename, f_filename_carved, "");
+
+	std::string f_filename_bound = std::string(RESOURCE_DIR) + "/data/shaders/bound.frag.glsl";
+	m_bound_shader = gl_tools::compile_shaders(v_filename, f_filename_bound, "");
 }
 
 void Window::ResetSphereCarving() {
 	m_sc = SphereCarving(m_sdf_shape);
+	m_sc.Iterate();
 	LoadCarvedBuffer();
+	LoadBoundBuffer();
 }
 
 void Window::ProcessInputs() {
@@ -230,7 +239,11 @@ bool Window::MouseOverGUI() {
 
 void Window::LoadCarvedBuffer() {
 	glNamedBufferData(m_carved_buffer, m_sc.GetSpheresetSize() * sizeof(glm::vec4), m_sc.GetSphereData(), GL_STATIC_READ);
-	std::cout << "Loaded " << m_sc.GetSpheresetSize() << " spheres." << std::endl;
+}
+
+void Window::LoadBoundBuffer() {
+	glNamedBufferData(m_bound_buffer, m_sc.GetConvexHullSize() * sizeof(glm::vec4), m_sc.GetConvexHullData(), GL_STATIC_READ);
+	std::cout << m_sc.GetConvexHullSize() << " planes" << std::endl;
 }
 
 void Window::RenderSDF() {
@@ -280,6 +293,30 @@ void Window::RenderCarved() {
 	glUseProgram(0);
 }
 
+void Window::RenderBound() {
+	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(m_bound_shader);
+
+	glUniform2i(glGetUniformLocation(m_bound_shader, "uResolution"), Window::width, Window::height);
+	glUniform3f(glGetUniformLocation(m_bound_shader, "center"), Window::orbiter.center[0], Window::orbiter.center[1], Window::orbiter.center[2]);
+	glm::vec3 eye = std::cos(Window::orbiter.psi) * glm::vec3(std::cos(Window::orbiter.phi), std::sin(Window::orbiter.phi), 0.f) + glm::vec3(0.f, 0.f, std::sin(Window::orbiter.psi));
+	eye = Window::orbiter.radius * normalize(eye);
+	glUniform3f(glGetUniformLocation(m_bound_shader, "eye"), eye[0], eye[1], eye[2]);
+	glUniform1f(glGetUniformLocation(m_bound_shader, "focal"), Window::orbiter.focal);
+	glUniform3f(glGetUniformLocation(m_bound_shader, "up"), Window::orbiter.up[0], Window::orbiter.up[1], Window::orbiter.up[2]);
+
+	glUniform1i(glGetUniformLocation(m_bound_shader, "nb_hplanes"), m_sc.GetConvexHullSize());
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_bound_buffer);
+
+	glBindVertexArray(m_sdf_vao);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+	glUseProgram(0);
+}
+
 void Window::Render() {
 	switch (m_render_mode) {
 	case render_mode::SDF:
@@ -287,6 +324,9 @@ void Window::Render() {
 		break;
 	case render_mode::CARVED:
 		RenderCarved();
+		break;
+	case render_mode::BOUND:
+		RenderBound();
 		break;
 	default:
 		break;

@@ -26,8 +26,11 @@ private:
 
     std::vector<glm::vec4> sphere_set;
     std::vector<glm::vec3> point_set;
+    std::vector<glm::vec4> convex_hull;
 
     sdf::shape sdf_shape;
+
+    float min_sphere_radius = 0.05f;
 
     bool ValidIntersectionCheck(const glm::vec3& p, const glm::ivec3& spheres_id) const;
     void SphereSetIntersections();
@@ -38,5 +41,8 @@ public:
     void* GetSphereData() const { return (void*)sphere_set.data(); };
     glm::vec4 GetInitialSphere() const { return initial_sphere; };
     int GetSpheresetSize() const { return sphere_set.size(); };
+    const std::vector<glm::vec3>& GetPointsetData() const { return point_set; };
     int GetPointsetSize() const { return point_set.size(); };
+    void* GetConvexHullData() const { return (void*)convex_hull.data(); };
+    int GetConvexHullSize() const { return convex_hull.size(); };
 };

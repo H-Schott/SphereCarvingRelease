@@ -12,11 +12,18 @@ SphereCarving::SphereCarving(const sdf::shape& sdf_shape_) : sdf_shape(sdf_shape
 
 
 bool SphereCarving::ValidIntersectionCheck(const glm::vec3& p, const glm::ivec3& spheres_id) const {
+	// inside initial sphere
 	if (!geo::sphere_inclusion_check(initial_sphere, p)) return false;
 
+	// outside every other sphere
 	for (int i = 0; i < sphere_set.size(); i++) {
 		if (i == spheres_id.x || i == spheres_id.y || i == spheres_id.z) continue;
 		if (geo::sphere_inclusion_check(sphere_set[i], p)) return false;
+	}
+
+	// not too close to an existing point
+	for (int i = 0; i < point_set.size(); i++) {
+		if (glm::length(p - point_set[i]) < 0.001f) return false;
 	}
 
 	return true;
@@ -61,10 +68,14 @@ void SphereCarving::Iterate() {
 	// evaluate on the point_set to augment the sphere_set
 	for (int i = 0; i < point_set.size(); i++) {
 		const glm::vec3& p = point_set[i];
-		sphere_set.push_back(glm::vec4(p, sdf::evaluation(sdf_shape, p)));
+		float radius = sdf::evaluation(sdf_shape, p);
+		if (radius > min_sphere_radius) sphere_set.push_back(glm::vec4(p, radius));
 	}
 
 	// replace the point_set with every valid intersection of the sphere_set
 	point_set.clear();
 	SphereSetIntersections();
+
+	// compute convex hull
+	convex_hull = geo::convex_hull(point_set);
 }

@@ -117,7 +117,7 @@ bool raySphereInter(vec3 ro, vec3 rd, vec4 s, out vec3 p) {
 	return true;
 }
 
-bool SphereTraveling(vec3 ro, vec3 rd, out vec3 p, out vec3 n) {
+bool SphereTraveling(vec3 ro, vec3 rd, out vec3 p, out vec3 n, out int s) {
 
 	// already inside big sphere
 	if (inSphere(ro, big_sphere)) {
@@ -135,7 +135,9 @@ bool SphereTraveling(vec3 ro, vec3 rd, out vec3 p, out vec3 n) {
 	p += 0.001 * rd;
 	bool inCarved = true;
 	int last_sphere = -1;
+	s = 0;
 	for(int k = 0; k < 100; k++) {
+		s++;
 		inCarved = true;
 
 		// search a sphere that contains p
@@ -179,9 +181,11 @@ void main() {
     vec3 rd = normalize(ro - focal_point);
 
     vec3 p, n;
-    bool hit = SphereTraveling(ro , rd, p, n);
+	int s;
+    bool hit = SphereTraveling(ro , rd, p, n, s);
 
     vec3 color = vec3(0.3);
+	//color = vec3(float(s) / 10.);
 
     if (hit) {
         color = 0.7 + 0.3 * n;
