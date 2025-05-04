@@ -11,4 +11,4 @@ git clone https://github.com/H-Schott/SphereCarvingRelease.git
 ```
 
 Can be compiled on Windows or Linux, using the CMake file.
-Requires at least OpenGl 4.6
+Requires at least OpenGl 4.3
