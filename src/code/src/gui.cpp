@@ -25,15 +25,21 @@ void Window::GUI() {
 
 		ImGui::Separator();
 
-		// Shapes radio buttons
+		// Shapes combo
 		{
 			ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.8f, 1.0f), "SDF shapes");
-			for (int shape_id = 0; shape_id < sdf::shape_list.size(); shape_id++) {
-				if (ImGui::RadioButton(sdf::shape_name_list[shape_id].c_str(), (int*)&m_sdf_shape, shape_id)) {
-					m_sdf_shape = sdf::shape_list[shape_id];
-					ResetSphereCarving();
-					ReloadShaders();
+			if (ImGui::BeginCombo("Shapes", sdf::shape_name_list[(int)m_sdf_shape].c_str())) {
+				for (int shape_id = 0; shape_id < sdf::shape_name_list.size(); shape_id++) {
+					bool is_selected = ((int)m_sdf_shape == shape_id);
+					if (ImGui::Selectable(sdf::shape_name_list[shape_id].c_str(), is_selected)) {
+						m_sdf_shape = (sdf::shape)shape_id;
+						ResetSphereCarving();
+						ReloadShaders();
+					}
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();
 				}
+				ImGui::EndCombo();
 			}
 		}
 
@@ -54,7 +60,7 @@ void Window::GUI() {
 
 		{
 			ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.8f, 1.0f), "Sphere Carving");
-			ImGui::Text("%d spheres & %i points", m_sc.GetSpheresetSize(), m_sc.GetPointsetSize());
+			ImGui::Text("%d spheres & %i points & %i planes", m_sc.GetSpheresetSize(), m_sc.GetPointsetSize(), m_sc.GetConvexHullSize());
 			if (ImGui::Button("Reset")) {
 				ResetSphereCarving();
 			}

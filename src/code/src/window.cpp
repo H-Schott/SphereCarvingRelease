@@ -243,7 +243,6 @@ void Window::LoadCarvedBuffer() {
 
 void Window::LoadBoundBuffer() {
 	glNamedBufferData(m_bound_buffer, m_sc.GetConvexHullSize() * sizeof(glm::vec4), m_sc.GetConvexHullData(), GL_STATIC_READ);
-	std::cout << m_sc.GetConvexHullSize() << " planes" << std::endl;
 }
 
 void Window::RenderSDF() {

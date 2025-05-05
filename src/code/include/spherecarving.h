@@ -5,7 +5,7 @@
 class SphereCarving {
 private:
 
-    static constexpr float gr = 1.618034;
+    static constexpr float gr = 1.618034f;
     static constexpr glm::vec3 initial_points[12] = {
         glm::vec3(0, 1, gr),
         glm::vec3(0, 1, -gr),
@@ -40,9 +40,9 @@ public:
     void Iterate();
     void* GetSphereData() const { return (void*)sphere_set.data(); };
     glm::vec4 GetInitialSphere() const { return initial_sphere; };
-    int GetSpheresetSize() const { return sphere_set.size(); };
+    int GetSpheresetSize() const { return int(sphere_set.size()); };
     const std::vector<glm::vec3>& GetPointsetData() const { return point_set; };
-    int GetPointsetSize() const { return point_set.size(); };
+    int GetPointsetSize() const { return int(point_set.size()); };
     void* GetConvexHullData() const { return (void*)convex_hull.data(); };
-    int GetConvexHullSize() const { return convex_hull.size(); };
+    int GetConvexHullSize() const { return int(convex_hull.size()); };
 };

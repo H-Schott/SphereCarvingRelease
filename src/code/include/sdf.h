@@ -3,12 +3,15 @@
 #include <array>
 
 namespace sdf {
-	enum class shape {SPHERE, BOX, CYLINDER, CAD};
-	static const std::array<sdf::shape, 4> shape_list = { sdf::shape::SPHERE,
+	enum class shape {SPHERE, SPHERES, BOX, CYLINDER, CAD};
+	/*
+	static const std::array<sdf::shape, 4> shape_list = {sdf::shape::SPHERE,
 														  sdf::shape::BOX,
 														  sdf::shape::CYLINDER,
 														  sdf::shape::CAD };
-	static const std::array<std::string, 4> shape_name_list = { "Sphere",
+	*/
+	static const std::array<std::string, 5> shape_name_list = { "Sphere",
+																"Spheres",
 																"Box",
 																"Cylinder",
 																"CAD" };
