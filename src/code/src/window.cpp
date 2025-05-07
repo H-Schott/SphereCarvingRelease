@@ -195,6 +195,9 @@ void Window::ReloadShaders() {
 
 	std::string f_filename_bound = std::string(RESOURCE_DIR) + "/data/shaders/bound.frag.glsl";
 	m_bound_shader = gl_tools::compile_shaders(v_filename, f_filename_bound, "");
+
+	std::string f_filename_sdfbound = std::string(RESOURCE_DIR) + "/data/shaders/sdfbound.frag.glsl";
+	m_sdfbound_shader = gl_tools::compile_shaders(v_filename, f_filename_sdfbound, sdf::glsl_txt(m_sdf_shape));
 }
 
 void Window::ResetSphereCarving() {
@@ -316,6 +319,30 @@ void Window::RenderBound() {
 	glUseProgram(0);
 }
 
+void Window::RenderSdfBound() {
+	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(m_sdfbound_shader);
+
+	glUniform2i(glGetUniformLocation(m_sdfbound_shader, "uResolution"), Window::width, Window::height);
+	glUniform3f(glGetUniformLocation(m_sdfbound_shader, "center"), Window::orbiter.center[0], Window::orbiter.center[1], Window::orbiter.center[2]);
+	glm::vec3 eye = std::cos(Window::orbiter.psi) * glm::vec3(std::cos(Window::orbiter.phi), std::sin(Window::orbiter.phi), 0.f) + glm::vec3(0.f, 0.f, std::sin(Window::orbiter.psi));
+	eye = Window::orbiter.radius * normalize(eye);
+	glUniform3f(glGetUniformLocation(m_sdfbound_shader, "eye"), eye[0], eye[1], eye[2]);
+	glUniform1f(glGetUniformLocation(m_sdfbound_shader, "focal"), Window::orbiter.focal);
+	glUniform3f(glGetUniformLocation(m_sdfbound_shader, "up"), Window::orbiter.up[0], Window::orbiter.up[1], Window::orbiter.up[2]);
+
+	glUniform1i(glGetUniformLocation(m_sdfbound_shader, "nb_hplanes"), m_sc.GetConvexHullSize());
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_bound_buffer);
+
+	glBindVertexArray(m_sdf_vao);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+	glUseProgram(0);
+}
+
 void Window::Render() {
 	switch (m_render_mode) {
 	case render_mode::SDF:
@@ -326,6 +353,9 @@ void Window::Render() {
 		break;
 	case render_mode::BOUND:
 		RenderBound();
+		break;
+	case render_mode::SDF_BOUND:
+		RenderSdfBound();
 		break;
 	default:
 		break;

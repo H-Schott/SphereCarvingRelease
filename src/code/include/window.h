@@ -23,14 +23,15 @@ protected:
 	inline static GLuint m_sdf_shader = 0;
 	inline static GLuint m_carved_shader = 0;
 	inline static GLuint m_bound_shader = 0;
+	inline static GLuint m_sdfbound_shader = 0;
 
 	inline static GLuint m_sdf_vao = 0;
 	inline static GLuint m_carved_buffer = 0;
 	inline static GLuint m_bound_buffer = 0;
 
-	enum class render_mode {SDF, CARVED, BOUND};
+	enum class render_mode {SDF, CARVED, BOUND, SDF_BOUND};
 	inline static render_mode m_render_mode = render_mode::SDF;
-	inline static const std::array<std::string, 3> m_render_mode_name_list = { "Sdf", "Carved", "Bound"};
+	inline static const std::array<std::string, 4> m_render_mode_name_list = { "Sdf", "Carved", "Bound", "Sdf + Bound"};
 
 	// Orbiter
 	struct Orbiter {
@@ -57,6 +58,7 @@ protected:
 	static void RenderSDF();
 	static void RenderCarved();
 	static void RenderBound();
+	static void RenderSdfBound();
 	static void Render();
 
 public:
