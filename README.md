@@ -5,8 +5,9 @@ Note that this implementation differs from the one presented in the paper.
 
 ![](teaser.jpg)
 
-[🗎 Project page](https://aparis69.github.io/SphereCarving/index.html)
-[📽️ Video](https://aparis69.github.io/SphereCarving/documents/video.mp4)
+[Project page](https://aparis69.github.io/SphereCarving/index.html)
+
+[Video](https://aparis69.github.io/SphereCarving/documents/video.mp4)
 
 ## Compile
 
@@ -41,4 +42,4 @@ New example shapes may be added in the future.
 	volume = {}
 }
 ```
-This code is released with MIT License.
+This code is released under MIT License.
