@@ -17,7 +17,7 @@ protected:
 	static int width, height;
 
 	// Model
-	inline static sdf::shape m_sdf_shape = sdf::shape::SPHERE;
+	inline static sdf::shape m_sdf_shape = sdf::shape::CAD;
 
 	// OpenGL
 	inline static GLuint m_sdf_shader = 0;
@@ -30,7 +30,7 @@ protected:
 	inline static GLuint m_bound_buffer = 0;
 
 	enum class render_mode {SDF, CARVED, BOUND, SDF_BOUND};
-	inline static render_mode m_render_mode = render_mode::SDF;
+	inline static render_mode m_render_mode = render_mode::SDF_BOUND;
 	inline static const std::array<std::string, 4> m_render_mode_name_list = { "Sdf", "Carved", "Bound", "Sdf + Bound"};
 
 	// Orbiter

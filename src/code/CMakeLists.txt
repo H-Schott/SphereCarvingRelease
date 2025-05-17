@@ -11,7 +11,6 @@ target_sources(main
     include/spherecarving.h
     include/stb_image.h
     include/stb_image_write.h
-    include/texture.h
     include/window.h
     include/write_16_png.h
     PRIVATE
@@ -24,7 +23,6 @@ target_sources(main
     src/main.cpp
     src/sdf.cpp
     src/spherecarving.cpp
-    src/texture.cpp
     src/window.cpp
     src/write_16_png.cpp
 )

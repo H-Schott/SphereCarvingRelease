@@ -4,12 +4,7 @@
 
 namespace sdf {
 	enum class shape {SPHERE, SPHERES, BOX, CYLINDER, CAD};
-	/*
-	static const std::array<sdf::shape, 4> shape_list = {sdf::shape::SPHERE,
-														  sdf::shape::BOX,
-														  sdf::shape::CYLINDER,
-														  sdf::shape::CAD };
-	*/
+
 	static const std::array<std::string, 5> shape_name_list = { "Sphere",
 																"Spheres",
 																"Box",
