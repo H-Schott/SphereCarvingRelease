@@ -17,7 +17,7 @@ protected:
 	static int width, height;
 
 	// Model
-	inline static sdf::shape m_sdf_shape = sdf::shape::CAD;
+	inline static sdf::shape m_sdf_shape = sdf::shape::CAD_1;
 
 	// OpenGL
 	inline static GLuint m_sdf_shader = 0;
