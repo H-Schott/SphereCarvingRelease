@@ -1,4 +1,4 @@
-#version 430 core
+#version 330 core
 
 uniform ivec2 uResolution;
 
@@ -11,9 +11,14 @@ uniform vec3 up = vec3(0, 0, 1);
 out vec4 FragColor;
 
 // bound data
-layout(binding = 0, std430) readonly  buffer InHalfPlanes  { vec4  hplanes[]; };
+//layout(binding = 0, std430) readonly  buffer InHalfPlanes  { vec4  hplanes[]; };
 
 uniform int nb_hplanes = 0;
+uniform sampler2D hplanes_tex;
+
+vec4 getPlane(int i) {
+    return texelFetch(hplanes_tex, ivec2(i, 0), 0);
+}
 
 bool in_hplane(vec3 p, vec4 hp) {
     return dot(p, vec3(hp)) < hp.w + 0.0001;
@@ -36,12 +41,12 @@ bool HalfPlaneTraveling(vec3 ro, vec3 rd, out vec3 p, out vec3 n, out int nb_ste
         // find a half-plane that does not contain p
         for (int i = 0; i < nb_hplanes; i++) {
             if (i == last_plane) continue;
-            if (!in_hplane(p, hplanes[i])) {
+            if (!in_hplane(p, getPlane(i))) {
                 in_bound = false;
                 last_plane = i;
 
                 // intersect ray and the halfplane
-                float t = rayPlaneIntersection(p, rd, hplanes[i]);
+                float t = rayPlaneIntersection(p, rd, getPlane(i));
                 if (t < 0) return false;
                 p += t * rd;
 
@@ -50,7 +55,7 @@ bool HalfPlaneTraveling(vec3 ro, vec3 rd, out vec3 p, out vec3 n, out int nb_ste
         }
 
         if (in_bound) {
-            n = (last_plane == -1) ? vec3(0) : vec3(hplanes[last_plane]);
+            n = (last_plane == -1) ? vec3(0) : vec3(getPlane(last_plane));
             return true;
         }
 

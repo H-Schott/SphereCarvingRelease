@@ -28,6 +28,8 @@ protected:
 	inline static GLuint m_sdf_vao = 0;
 	inline static GLuint m_carved_buffer = 0;
 	inline static GLuint m_bound_buffer = 0;
+	inline static GLuint m_carved_texture = 0;
+	inline static GLuint m_bound_texture = 0;
 
 	enum class render_mode {SDF, CARVED, BOUND, SDF_BOUND};
 	inline static render_mode m_render_mode = render_mode::SDF_BOUND;
@@ -53,8 +55,8 @@ protected:
 
 	static void InitGL();
 	static void ProcessInputs();
-	static void LoadCarvedBuffer();
-	static void LoadBoundBuffer();
+	static void LoadCarvedData();
+	static void LoadBoundData();
 	static void RenderSDF();
 	static void RenderCarved();
 	static void RenderBound();

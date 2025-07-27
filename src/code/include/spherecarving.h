@@ -38,7 +38,18 @@ public:
     SphereCarving(const sdf::shape& sdf_shape_);
     
     void Iterate();
+    glm::vec4 GetSphere(int i) const { return sphere_set[i]; };
     void* GetSphereData() const { return (void*)sphere_set.data(); };
+    std::vector<float> GetSpheresF() const {
+        std::vector<float> f;
+        for (const glm::vec4& s : sphere_set) {
+            f.push_back(s.x);
+            f.push_back(s.y);
+            f.push_back(s.z);
+            f.push_back(s.w);
+        }
+        return f;
+    };
     glm::vec4 GetInitialSphere() const { return initial_sphere; };
     int GetSpheresetSize() const { return int(sphere_set.size()); };
     const std::vector<glm::vec3>& GetPointsetData() const { return point_set; };

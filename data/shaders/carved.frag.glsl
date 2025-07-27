@@ -1,4 +1,4 @@
-#version 430 core
+#version 330 core
 
 uniform ivec2 uResolution;
 
@@ -11,10 +11,14 @@ uniform vec3 up = vec3(0, 0, 1);
 out vec4 FragColor;
 
 // spheres data
-layout(binding = 0, std430) readonly  buffer InSPheres  { vec4  spheres[]; };
+//layout(binding = 0, std430) readonly  buffer InSPheres  { vec4  spheres[]; };
 uniform vec4 big_sphere;
 uniform int nb_spheres;
+uniform sampler2D spheres_tex;
 
+vec4 getSphere(int i) {
+	return texelFetch(spheres_tex, ivec2(i, 0), 0);
+}
 
 bool inSphere(vec3 p, vec4 s) {
 	return length(p - vec3(s)) < s.w;
@@ -28,7 +32,7 @@ bool isInShape(vec3 p) {
 	if (!inSphere(p, big_sphere)) return false;
 
 	for (int i = 0; i < nb_spheres; i++) {
-		if (inSphere(p, spheres[i])) return false;
+		if (inSphere(p, getSphere(i))) return false;
 	}
 
 	return true;
@@ -40,9 +44,9 @@ vec4 closestSphere(vec3 p, out bool isBigSphere) {
 	isBigSphere = true;
 
 	for (int i = 0; i < nb_spheres; i++) {
-		float d = abs(distSphere(p, spheres[i]));
+		float d = abs(distSphere(p, getSphere(i)));
 		if (d < dmin) {
-			smin = spheres[i];
+			smin = getSphere(i);
 			dmin = d;
 			isBigSphere = false;
 		}
@@ -109,18 +113,18 @@ bool SphereTraveling(vec3 ro, vec3 rd, out vec3 p, out vec3 n, out int s) {
 
 		// search a sphere that contains p
 		for(int i = 0; i < nb_spheres; i++) {
-			if (inSphere(p, spheres[i])) {
+			if (inSphere(p, getSphere(i))) {
 				inCarved = false;
 
 				vec3 q;
-				bool hit_s = raySphereInter(p, rd, spheres[i], q);
+				bool hit_s = raySphereInter(p, rd, getSphere(i), q);
 				p = q + 0.001 * rd;
 				last_sphere = i;
 			}
 		}
 
 		if (inCarved) {
-			n = (last_sphere == -1) ? normalize(p - vec3(big_sphere)) : normalize(vec3(spheres[last_sphere]) - p);
+			n = (last_sphere == -1) ? normalize(p - vec3(big_sphere)) : normalize(vec3(getSphere(last_sphere)) - p);
 			return true;
 		}
 
@@ -131,6 +135,9 @@ bool SphereTraveling(vec3 ro, vec3 rd, out vec3 p, out vec3 n, out int s) {
 }
 
 void main() {
+
+	//FragColor = vec4(texelFetch(spheres_tex, ivec2(0), 0).xyz, 1.);
+	//return;
 
     float screen_ratio = float(uResolution.x) / float(uResolution.y);
 

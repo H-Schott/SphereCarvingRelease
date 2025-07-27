@@ -161,6 +161,8 @@ Window::~Window()
 	glDeleteVertexArrays(1, &m_sdf_vao);
 	glDeleteBuffers(1, &m_carved_buffer);
 	glDeleteBuffers(1, &m_bound_buffer);
+	glDeleteTextures(1, &m_carved_texture);
+	glDeleteTextures(1, &m_bound_texture);
 
 	glDeleteProgram(m_sdf_shader);
 	glDeleteProgram(m_carved_shader);
@@ -179,6 +181,8 @@ void Window::InitGL() {
 	glGenVertexArrays(1, &m_sdf_vao);
 	glCreateBuffers(1, &m_carved_buffer);
 	glCreateBuffers(1, &m_bound_buffer);
+	glGenTextures(1, &m_carved_texture);
+	glGenTextures(1, &m_bound_texture);
 
 	ResetSphereCarving();
 
@@ -203,8 +207,8 @@ void Window::ReloadShaders() {
 void Window::ResetSphereCarving() {
 	m_sc = SphereCarving(m_sdf_shape);
 	m_sc.Iterate();
-	LoadCarvedBuffer();
-	LoadBoundBuffer();
+	LoadCarvedData();
+	LoadBoundData();
 }
 
 void Window::ProcessInputs() {
@@ -240,12 +244,19 @@ bool Window::MouseOverGUI() {
 		|| ImGui::IsAnyItemHovered();
 }
 
-void Window::LoadCarvedBuffer() {
-	glNamedBufferData(m_carved_buffer, m_sc.GetSpheresetSize() * sizeof(glm::vec4), m_sc.GetSphereData(), GL_STATIC_READ);
+void Window::LoadCarvedData() {
+	//glNamedBufferData(m_carved_buffer, m_sc.GetSpheresetSize() * sizeof(glm::vec4), m_sc.GetSphereData(), GL_STATIC_READ);
+
+	glBindTexture(GL_TEXTURE_2D, m_carved_texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, m_sc.GetSpheresetSize(), 1, 0, GL_RGBA, GL_FLOAT, m_sc.GetSphereData());
+
 }
 
-void Window::LoadBoundBuffer() {
-	glNamedBufferData(m_bound_buffer, m_sc.GetConvexHullSize() * sizeof(glm::vec4), m_sc.GetConvexHullData(), GL_STATIC_READ);
+void Window::LoadBoundData() {
+	//glNamedBufferData(m_bound_buffer, m_sc.GetConvexHullSize() * sizeof(glm::vec4), m_sc.GetConvexHullData(), GL_STATIC_READ);
+
+	glBindTexture(GL_TEXTURE_2D, m_bound_texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, m_sc.GetConvexHullSize(), 1, 0, GL_RGBA, GL_FLOAT, m_sc.GetConvexHullData());
 }
 
 void Window::RenderSDF() {
@@ -286,7 +297,13 @@ void Window::RenderCarved() {
 	glUniform1i(glGetUniformLocation(m_carved_shader, "nb_spheres"), m_sc.GetSpheresetSize());
 	glm::vec4 big_sphere = m_sc.GetInitialSphere();
 	glUniform4f(glGetUniformLocation(m_carved_shader, "big_sphere"), big_sphere.x, big_sphere.y, big_sphere.z, big_sphere.w);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_carved_buffer);
+	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_carved_buffer);
+
+	glBindTexture(GL_TEXTURE_2D, m_carved_texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	glBindVertexArray(m_sdf_vao);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -310,7 +327,13 @@ void Window::RenderBound() {
 	glUniform3f(glGetUniformLocation(m_bound_shader, "up"), Window::orbiter.up[0], Window::orbiter.up[1], Window::orbiter.up[2]);
 
 	glUniform1i(glGetUniformLocation(m_bound_shader, "nb_hplanes"), m_sc.GetConvexHullSize());
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_bound_buffer);
+	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_bound_buffer);
+
+	glBindTexture(GL_TEXTURE_2D, m_bound_texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	glBindVertexArray(m_sdf_vao);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -334,7 +357,13 @@ void Window::RenderSdfBound() {
 	glUniform3f(glGetUniformLocation(m_sdfbound_shader, "up"), Window::orbiter.up[0], Window::orbiter.up[1], Window::orbiter.up[2]);
 
 	glUniform1i(glGetUniformLocation(m_sdfbound_shader, "nb_hplanes"), m_sc.GetConvexHullSize());
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_bound_buffer);
+	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_bound_buffer);
+
+	glBindTexture(GL_TEXTURE_2D, m_bound_texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	glBindVertexArray(m_sdf_vao);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

@@ -67,8 +67,8 @@ void Window::GUI() {
 			ImGui::SameLine();
 			if (ImGui::Button("Iterate")) {
 				m_sc.Iterate();
-				LoadCarvedBuffer();
-				LoadBoundBuffer();
+				LoadCarvedData();
+				LoadBoundData();
 			}
 		}
 	}
