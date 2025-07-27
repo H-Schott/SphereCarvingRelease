@@ -229,22 +229,26 @@ float sdf::evaluation(const sdf::shape& s, const glm::vec3& p) {
 	float d = 0.f;
 
 	switch (s) {
-	case sdf::shape::SPHERE:
+	case sdf::shape::SPHERE: {
 		d = sdf::d_sphere(p, 1.f);
 		break;
-	case sdf::shape::SPHERES:
+	}
+	case sdf::shape::SPHERES: {
 		d = sdf::d_sphere(p - glm::vec3(0.2, 0.3, 0.5), 0.15f);
 		d = std::min(d, sdf::d_sphere(p - glm::vec3(0.3, -0.3, 0.1), 0.1f));
 		d = std::min(d, sdf::d_sphere(p - glm::vec3(-0.2, 0., -0.4), 0.2f));
 		d = std::min(d, sdf::d_sphere(p - glm::vec3(-0.4, -0.6, -0.2), 0.05f));
 		break;
-	case sdf::shape::BOX:
+	}
+	case sdf::shape::BOX: {
 		d = sdf::d_box(p, glm::vec3(0.3, 0.6, 1.));
 		break;
-	case sdf::shape::CYLINDER:
+	}
+	case sdf::shape::CYLINDER: {
 		d = sdf::d_cylinder(p, 1.f, 0.3f);
 		break;
-	case sdf::shape::CAD_1:
+	}
+	case sdf::shape::CAD_1: {
 		d = d_box(p, glm::vec3(0.3, 0.6, 1.));
 		d = std::max(d, -d_box(p - glm::vec3(0.2, -0.4, 0.), glm::vec3(0.3, 0.6, 0.1)));
 		glm::vec3 q = glm::vec3(p.z, p.x, p.y);
@@ -254,15 +258,19 @@ float sdf::evaluation(const sdf::shape& s, const glm::vec3& p) {
 		d = std::max(d, -d_cylinder(q + glm::vec3(0.85, 0., -0.45), 0.4f, 0.1f));
 		d = std::max(d, -d_cylinder(q + glm::vec3(-0.85, 0., -0.45), 0.4f, 0.1f));
 		break;
-	case sdf::shape::CAD_2:
+	}
+	case sdf::shape::CAD_2: {
 		d = c2_tree(p * 6.f) / 6.f;
 		break;
-	case sdf::shape::TEAPOT:
+	}
+	case sdf::shape::TEAPOT: {
 		d = tp_tree(p);
 		break;
-	default:
+	}
+	default: {
 		d = sdf::d_sphere(p, 1.f);
 		break;
+	}
 	}
 
 	return d;
@@ -272,14 +280,15 @@ std::string sdf::glsl_txt(const sdf::shape& s) {
 	std::string txt = "";
 
 	switch (s) {
-	case sdf::shape::SPHERE:
+	case sdf::shape::SPHERE: {
 		txt = R"(
 			float sdf(vec3 p) {
 				return d_sphere(p, 1.);
 			}
 		)";
 		break;
-	case sdf::shape::SPHERES:
+	}
+	case sdf::shape::SPHERES: {
 		txt = R"(
 			float sdf(vec3 p) {
 				float d = d_sphere(p - vec3(0.2, 0.3, 0.5), 0.15f);
@@ -290,21 +299,24 @@ std::string sdf::glsl_txt(const sdf::shape& s) {
 			}
 		)";
 		break;
-	case sdf::shape::BOX:
+	}
+	case sdf::shape::BOX: {
 		txt = R"(
 			float sdf(vec3 p) {
 				return d_box(p, vec3(0.3, 0.6, 1.));
 			}
 		)";
 		break;
-	case sdf::shape::CYLINDER:
+	}
+	case sdf::shape::CYLINDER: {
 		txt = R"(
 			float sdf(vec3 p) {
 				return d_cylinder(p, 1., 0.3);
 			}
 		)";
 		break;
-	case sdf::shape::CAD_1:
+	}
+	case sdf::shape::CAD_1: {
 		txt = R"(
 			float sdf(vec3 p) {
 				float d = d_box(p, vec3(0.3, 0.6, 1.));
@@ -319,27 +331,31 @@ std::string sdf::glsl_txt(const sdf::shape& s) {
 			}
 		)";
 		break;
-	case sdf::shape::CAD_2:
+	}
+	case sdf::shape::CAD_2: {
 		txt = R"(
 			float sdf(vec3 p) {
 				return c2_tree(p * 6.f) / 6.f;
 			}
 		)";
 		break;
-	case sdf::shape::TEAPOT:
+	}
+	case sdf::shape::TEAPOT: {
 		txt = R"(
 			float sdf(vec3 p) {
 				return tp_tree(p * 1.f) / 1.f;
 			}
 		)";
 		break;
-	default:
+	}
+	default: {
 		txt = R"(
 			float sdf(vec3 p) {
 				return d_sphere(p, 1.);
 			}
 		)";
 		break;
+	}
 	}
 
 	return txt;

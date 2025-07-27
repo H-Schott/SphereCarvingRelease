@@ -1,10 +1,11 @@
 #include "window.h"
+#include "iostream"
 
 int main() {
 	Window* window = new Window("Sphere Carving", 1000, 500);
 	
 	window->ResetCamera();
-
+	
 	while (!window->Exit()) {
 		window->Update();
 	}

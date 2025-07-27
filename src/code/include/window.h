@@ -15,6 +15,7 @@ class Window {
 protected:
 	static GLFWwindow* windowPtr;
 	static int width, height;
+	static float xscale, yscale;
 
 	// Model
 	inline static sdf::shape m_sdf_shape = sdf::shape::CAD_1;
@@ -26,8 +27,6 @@ protected:
 	inline static GLuint m_sdfbound_shader = 0;
 
 	inline static GLuint m_sdf_vao = 0;
-	inline static GLuint m_carved_buffer = 0;
-	inline static GLuint m_bound_buffer = 0;
 	inline static GLuint m_carved_texture = 0;
 	inline static GLuint m_bound_texture = 0;
 
@@ -43,6 +42,8 @@ protected:
 		glm::vec3 center = glm::vec3(0);
 		glm::vec3 up = glm::vec3(0, 0, 1);
 		float focal = 0.8f;
+
+		Orbiter() {};
 	};
 	inline static Orbiter orbiter = Window::Orbiter();
 

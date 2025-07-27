@@ -37,30 +37,35 @@ void GLAPIENTRY MessageCallback([[maybe_unused]] GLenum source,
 GLFWwindow* Window::windowPtr = nullptr;
 int Window::width = 0;
 int Window::height = 0;
+float Window::xscale = 1.f;
+float Window::yscale = 1.f;
 
 Window::Window(const char* windowName, int w, int h) {
 	Window::windowPtr = nullptr;
-
+	
 	// Window
 	Window::width = w;
 	Window::height = h;
-
+	
 	if (!glfwInit()) {
 		std::cerr << "GLFW failed to initialize" << std::endl;
 		glfwTerminate();
 		return;
 	}
-
+	
 	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 	if (!monitor) {
 		std::cerr << "GLFW failed to get primary monitor" << std::endl;
 		glfwTerminate();
 		return;
 	}
-
+	
 	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 	Window::width = Window::width <= 0 ? mode->width : Window::width;
 	Window::height = Window::height <= 0 ? mode->height : Window::height;
+	glfwGetMonitorContentScale(monitor, &Window::xscale, &Window::yscale);
+	Window::width *= Window::xscale;
+	Window::height *= Window::yscale;
 
 	//glfwDefaultWindowHints();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -80,12 +85,12 @@ Window::Window(const char* windowName, int w, int h) {
 	}
 	glfwMakeContextCurrent(Window::windowPtr);
 	glfwSetWindowSizeCallback(Window::windowPtr, [](GLFWwindow* win, int w, int h) {
-		Window::width = w;
-		Window::height = h;
-		glViewport(0, 0, w, h);
+		Window::width = int(w * Window::xscale);
+		Window::height = int(h * Window::yscale);
+		glViewport(0, 0, Window::width, Window::height);
 	});
 	glfwSetInputMode(Window::windowPtr, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-
+	
 	// OpenGL
 	glewInit();
 	glEnable(GL_DEPTH_TEST);
@@ -97,19 +102,19 @@ Window::Window(const char* windowName, int w, int h) {
 		return;
 	}
 	glEnable(GL_DEBUG_OUTPUT);
-	glDebugMessageCallback(MessageCallback, 0);
-
+	//glDebugMessageCallback(MessageCallback, 0);
+	
 	// Dear ImGui
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
 	ImGui_ImplGlfw_InitForOpenGL(Window::windowPtr, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
-
+	
 	// ImFileDialog requires you to set the CreateTexture and DeleteTexture
 	ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
 		GLuint tex;
-
+		
 		glGenTextures(1, &tex);
 		glBindTexture(GL_TEXTURE_2D, tex);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -119,39 +124,37 @@ Window::Window(const char* windowName, int w, int h) {
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 0);
-
+		
 		return (void*)tex;
 	};
 	ifd::FileDialog::Instance().DeleteTexture = [](void* tex) {
 		GLuint texID = (GLuint)((uintptr_t)tex);
 		glDeleteTextures(1, &texID);
 	};
-
-
+	
+	
 	glfwGetFramebufferSize(Window::windowPtr, &Window::width, &Window::height);
 	glViewport(0, 0, Window::width, Window::height);
-
+	
 	// vsync
 	glfwSwapInterval(1);
-
+	
 	std::cout << "OpenGL device information: Vendor: " << (const char*)glGetString(GL_VENDOR) << std::endl;
 	std::cout << "OpenGL device information: Renderer: " << (const char*)glGetString(GL_RENDERER) << std::endl;
 	std::cout << "Dear ImGui: " << ImGui::GetVersion() << std::endl;
-
+	
 	// glfw callbacks
 	glfwSetScrollCallback(Window::windowPtr, [](GLFWwindow* win, double xoffset, double yoffset) {
-			Window::orbiter.radius -= 0.9f * float(yoffset);
-			Window::orbiter.radius = std::clamp(Window::orbiter.radius, 0.1f, 30.f);
-		}
-	);
-
+		Window::orbiter.radius -= 0.9f * float(yoffset);
+		Window::orbiter.radius = std::clamp(Window::orbiter.radius, 0.1f, 30.f);
+	});
+	
 	glfwSetKeyCallback(Window::windowPtr, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
-			if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-				Window::ReloadShaders();
-			}
+		if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+			Window::ReloadShaders();
 		}
-	);
-
+	});
+	
 	// setup opengl
 	InitGL();
 }
@@ -159,8 +162,6 @@ Window::Window(const char* windowName, int w, int h) {
 Window::~Window()
 {
 	glDeleteVertexArrays(1, &m_sdf_vao);
-	glDeleteBuffers(1, &m_carved_buffer);
-	glDeleteBuffers(1, &m_bound_buffer);
 	glDeleteTextures(1, &m_carved_texture);
 	glDeleteTextures(1, &m_bound_texture);
 
@@ -179,8 +180,6 @@ void Window::InitGL() {
 	ReloadShaders();
 
 	glGenVertexArrays(1, &m_sdf_vao);
-	glCreateBuffers(1, &m_carved_buffer);
-	glCreateBuffers(1, &m_bound_buffer);
 	glGenTextures(1, &m_carved_texture);
 	glGenTextures(1, &m_bound_texture);
 
