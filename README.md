@@ -38,8 +38,8 @@ New example shapes may be added in the future.
 	journal = {ACM Transaction on Graphics (SIGGRAPH '25 Conference Proceedings)},
 	publisher = {ACM},
 	year = {2025},
-	number = {},
-	volume = {}
+	number = {44},
+	volume = {4}
 }
 ```
 This code is released under MIT License.
